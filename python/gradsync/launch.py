@@ -48,7 +48,7 @@ def _recv_exact(conn: socket.socket, n: int) -> bytes:
 
 
 def exchange_unique_id(
-    unique_id: bytes | None,
+    unique_id: bytes | list[int] | None,
     rank: int,
     world_size: int,
     master_addr: str,
@@ -61,7 +61,10 @@ def exchange_unique_id(
     connects and reads exactly 128 bytes. Returns the id bytes on every rank.
     """
     if rank == 0:
-        assert unique_id is not None and len(unique_id) == _ID_BYTES
+        assert unique_id is not None
+        if isinstance(unique_id, list):
+            unique_id = bytes(unique_id)
+        assert len(unique_id) == _ID_BYTES
         srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         srv.bind(("0.0.0.0", master_port))
